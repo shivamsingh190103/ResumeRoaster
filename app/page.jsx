@@ -116,6 +116,20 @@ function normalizeDimensions(dimensions) {
   }));
 }
 
+function parseEmbeddedJson(value) {
+  const normalized = value
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+  const firstBrace = normalized.indexOf("{");
+  const lastBrace = normalized.lastIndexOf("}");
+  const candidate =
+    firstBrace !== -1 && lastBrace !== -1 ? normalized.slice(firstBrace, lastBrace + 1) : normalized;
+
+  return JSON.parse(candidate);
+}
+
 function parseInitialResponse(fullText) {
   const resumeMatch = fullText.match(/RESUME_CONTEXT_START\s*([\s\S]*?)\s*RESUME_CONTEXT_END/);
   const scoreMatch = fullText.match(/SCORE_DATA_START\s*([\s\S]*?)\s*SCORE_DATA_END/);
@@ -125,7 +139,7 @@ function parseInitialResponse(fullText) {
 
   if (resumeMatch) {
     try {
-      const parsed = JSON.parse(resumeMatch[1]);
+      const parsed = parseEmbeddedJson(resumeMatch[1]);
       parsedResumeText = typeof parsed?.resumeText === "string" ? parsed.resumeText : "";
     } catch {
       parsedResumeText = "";
@@ -134,10 +148,14 @@ function parseInitialResponse(fullText) {
 
   if (scoreMatch) {
     try {
-      const parsed = JSON.parse(scoreMatch[1]);
+      const parsed = parseEmbeddedJson(scoreMatch[1]);
+      const dimensions = normalizeDimensions(parsed?.dimensions);
+      const fallbackTotal = Math.round(
+        (dimensions.reduce((sum, dimension) => sum + dimension.score, 0) / dimensions.length) * 10,
+      );
       parsedScoreData = {
-        total: clamp(Number(parsed?.total) || 0, 0, 100),
-        dimensions: normalizeDimensions(parsed?.dimensions),
+        total: clamp(Number(parsed?.total) || fallbackTotal, 0, 100),
+        dimensions,
       };
     } catch {
       parsedScoreData = null;
