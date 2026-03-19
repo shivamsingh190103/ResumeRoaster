@@ -184,7 +184,10 @@ SCORE_DATA_END`;
 }
 
 function stripScoreBlock(text) {
-  return text.replace(/SCORE_DATA_START[\s\S]*?SCORE_DATA_END\s*/gi, "").trim();
+  return text
+    .replace(/SCORE_DATA_START[\s\S]*?SCORE_DATA_END\s*/gi, "")
+    .replace(/SCORE_DATA_START[\s\S]*$/i, "")
+    .trim();
 }
 
 function buildFallbackScoreData(resumeText) {
@@ -310,8 +313,9 @@ async function collectGeminiText(response) {
 
 function buildInitialPayload(rawText, resumeText) {
   const normalizedRawText = rawText.trim();
-  const roastText = stripScoreBlock(normalizedRawText);
   const scoreData = extractScoreData(normalizedRawText, resumeText) || buildFallbackScoreData(resumeText);
+  const roastText = stripScoreBlock(normalizedRawText);
+  const finalRoastText = /THE ROAST/i.test(roastText) ? roastText : buildFallbackInitialRoast(resumeText);
 
   return (
     "RESUME_CONTEXT_START\n" +
@@ -319,7 +323,7 @@ function buildInitialPayload(rawText, resumeText) {
     "\nRESUME_CONTEXT_END\n\n" +
     buildScoreBlock(scoreData) +
     "\n\n" +
-    roastText
+    finalRoastText
   ).trim();
 }
 
