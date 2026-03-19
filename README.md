@@ -1,15 +1,45 @@
 # Resume Roaster
 
-Resume Roaster is a production-ready Next.js app for Indian CS students and job seekers who want genuinely useful resume feedback, not polite filler. The topic was chosen because most early-career resumes are packed with vague bullets, overused buzzwords, and weak proof of impact, and direct feedback helps people improve faster.
+## What It Is
+
+Resume Roaster is a production-grade AI resume coach for CS students and early-career software engineers. Users upload a PDF or Word resume, or paste the full text, then move through a three-step flow:
+
+1. Upload the resume
+2. Reveal a dramatic resume health score across 8 dimensions
+3. Continue the conversation in a streaming chat to fix each issue in depth
+
+## Why This Topic
+
+Most resume tools are too gentle to be useful. Resume Roaster is designed around the reality that recruiters skim fast, reject vague bullets immediately, and reward specificity. The product leans into that with honest scoring, sharp feedback, before/after rewrites, and follow-up conversation instead of a one-shot report.
+
+## Frontend Decisions
+
+- A three-phase flow keeps the experience focused: upload first, then the score reveal, then the deeper chat.
+- The score reveal creates a real “hero moment” before the user drops into the conversation.
+- Severity badges plus before/after rewrites help users prioritize and act fast.
+- Suggested follow-up chips remove blank-page friction after the first roast.
+- Streaming responses make the assistant feel alive instead of static.
+- Start over resets the whole experience cleanly so users can test a revised resume without stale state leaking through.
 
 ## Features
 
-- Upload PDF resumes for server-side parsing and feedback
-- Upload DOCX resumes for server-side parsing and feedback
-- Paste resume text directly into the app
-- Rotating loading messages while Gemini generates the roast
-- Structured output with separate roast and fixes sections
-- Copy feedback button for quick sharing or reuse
+- PDF upload with server-side parsing via `pdf-parse`
+- DOC and DOCX upload with server-side parsing via `mammoth`
+- Paste-text mode with live character counting
+- Loading state with rotating status messages and shimmer bar
+- Animated resume score ring and 8-dimension breakdown
+- Structured first roast with severity badges and before/after rewrite blocks
+- Streaming follow-up chat with persistent resume context
+- Copy feedback and share-summary actions
+
+## Tech Stack
+
+- Next.js 15 App Router
+- React 19
+- JavaScript only
+- CSS Modules only
+- Gemini Flash via plain `fetch`
+- `pdf-parse` and `mammoth` on the server
 
 ## Setup
 
@@ -20,13 +50,13 @@ Resume Roaster is a production-ready Next.js app for Indian CS students and job 
 npm install
 ```
 
-3. Create a `.env.local` file in the project root:
+3. Create `.env.local` in the project root:
 
 ```bash
 GEMINI_API_KEY=your_key_here
 ```
 
-4. Start the development server:
+4. Start the app:
 
 ```bash
 npm run dev
@@ -34,30 +64,24 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000).
 
-## Get A Free Gemini API Key
+## Gemini Key
 
-1. Go to [aistudio.google.com](https://aistudio.google.com).
-2. Sign in with your Google account.
-3. Click `Get API key`.
-4. Create a key and paste it into `.env.local` as `GEMINI_API_KEY`.
-
-The key is only used server-side in `app/api/chat/route.js`. It is never exposed in the frontend bundle.
+Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com). The key is used only in `app/api/chat/route.js` and is never exposed to the browser.
 
 ## Deploy To Vercel
 
-1. Push the repository to GitHub.
-2. Import the repository into Vercel.
-3. Add `GEMINI_API_KEY` in the Vercel project environment variables.
+1. Push the repo to GitHub.
+2. Import the project into Vercel.
+3. Add `GEMINI_API_KEY` in the Vercel environment settings.
 4. Deploy.
-
-Vercel will build the Next.js app and run the resume parsing plus Gemini roast flow on the server.
 
 ## How It Works
 
-1. The user uploads a PDF or DOCX file, or pastes resume text manually.
-2. The server extracts resume text from the uploaded file with `pdf-parse` or `mammoth`.
-3. The parsed text is sent to Gemini with a structured roast prompt.
-4. The app renders the roast and fixes in a clean, formatted result card.
+1. The client sends either an uploaded file or pasted resume text to the API route.
+2. The server parses the file into plain text when needed.
+3. Gemini streams the initial roast back, including hidden score metadata for the score reveal phase.
+4. The client extracts the score block, shows the animated score UI, then transitions into chat.
+5. Follow-up questions are streamed with the original resume and conversation history preserved.
 
 ## Project Structure
 
@@ -75,14 +99,3 @@ resume-roaster/
 ├── package.json
 └── README.md
 ```
-
-## File Guide
-
-- `app/layout.js`: App Router layout and metadata.
-- `app/globals.css`: Base resets and global typography styles.
-- `app/page.jsx`: Client-side upload, paste, loading, result, and copy interactions.
-- `app/page.module.css`: Component-scoped styles for the product UI.
-- `app/api/chat/route.js`: Server route for file parsing, validation, and Gemini requests.
-- `next.config.mjs`: Next.js configuration for server-side packages.
-- `package.json`: Scripts and dependencies.
-- `README.md`: Setup, deployment, and architecture overview.
