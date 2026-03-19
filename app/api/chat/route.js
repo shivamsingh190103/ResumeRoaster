@@ -152,7 +152,10 @@ async function extractResumeTextFromFile(file) {
 export async function POST(request) {
   try {
     if (!process.env.GEMINI_API_KEY) {
-      return createJsonResponse("Missing GEMINI_API_KEY on the server.", 500);
+      return createJsonResponse(
+        "GEMINI_API_KEY is not set. Add it to .env.local locally or Vercel Environment Variables on deployed site.",
+        500,
+      );
     }
 
     const contentType = request.headers.get("content-type") || "";

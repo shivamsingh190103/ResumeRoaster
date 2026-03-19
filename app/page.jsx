@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 
-const STATS = [
-  { icon: "📊", label: "Scores 8 resume dimensions" },
-  { icon: "🎯", label: "Specific rewrites, not vague advice" },
-  { icon: "💬", label: "Chat to fix any issue in depth" },
+const LANDING_STATS = [
+  { value: "8", label: "Dimensions scored" },
+  { value: "100%", label: "Free to use" },
+  { value: "0", label: "Sugarcoating" },
 ];
 
 const FOLLOW_UP_CHIPS = [
@@ -787,6 +787,53 @@ export default function HomePage() {
     }
   }
 
+  function renderLandingShell(cardContent) {
+    return (
+      <>
+        <header className={styles.navBar}>
+          <div className={styles.navInner}>
+            <p className={styles.navLogo}>
+              Resume <span className={styles.navAccent}>Roaster</span>
+            </p>
+            <span className={styles.betaTag}>Beta</span>
+          </div>
+        </header>
+
+        <section className={styles.hero}>
+          <span className={styles.eyebrow}>
+            <span className={styles.eyebrowDot} />
+            <span>AI-powered resume analysis</span>
+          </span>
+          <h1 className={styles.title}>
+            <span className={styles.heroLine}>Your resume</span>
+            <span className={styles.heroLine}>
+              is getting <span className={styles.titleAccent}>roasted.</span>
+            </span>
+          </h1>
+          <p className={styles.subtitle}>
+            Upload your resume. Get a brutal honest score, specific rewrites, and a real
+            conversation to fix every problem.
+          </p>
+          <div className={styles.statGrid}>
+            {LANDING_STATS.map((stat, index) => (
+              <div
+                key={stat.label}
+                className={`${styles.statCell} ${index === LANDING_STATS.length - 1 ? styles.statCellLast : ""}`}
+              >
+                <p className={styles.statValue}>
+                  <span className={styles.statNumber}>{stat.value}</span>
+                </p>
+                <p className={styles.statLabel}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {cardContent}
+      </>
+    );
+  }
+
   function renderUploadPhase() {
     const uploadZoneStateClass = selectedFile
       ? styles.uploadZoneSuccess
@@ -794,28 +841,8 @@ export default function HomePage() {
         ? styles.uploadZoneDragOver
         : "";
 
-    return (
-      <>
-        <section className={styles.hero}>
-          <span className={styles.eyebrow}>AI-powered resume analysis</span>
-          <h1 className={styles.title}>
-            Resume <span className={styles.titleAccent}>Roaster</span>
-          </h1>
-          <p className={styles.subtitle}>
-            Upload your resume. Get a score, a roast, and a real conversation to fix every
-            problem.
-          </p>
-          <div className={styles.statRow}>
-            {STATS.map((stat) => (
-              <span key={stat.label} className={styles.statPill}>
-                <span aria-hidden="true">{stat.icon}</span>
-                <span>{stat.label}</span>
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.card}>
+    return renderLandingShell(
+      <section className={`${styles.card} ${styles.uploadCard}`}>
           <div className={styles.tabRow} role="tablist" aria-label="Choose how to provide your resume">
             <button
               type="button"
@@ -898,7 +925,7 @@ export default function HomePage() {
                       <UploadIcon />
                     </div>
                     <p className={styles.uploadHeadline}>Drop your resume here</p>
-                    <p className={styles.uploadSubline}>PDF or DOCX — max 5MB</p>
+                    <p className={styles.uploadSubline}>PDF or Word doc · Max 5MB</p>
                     <button
                       type="button"
                       className={styles.secondaryAction}
@@ -908,6 +935,14 @@ export default function HomePage() {
                     </button>
                   </>
                 )}
+              </div>
+
+              <div className={styles.dividerRow}>
+                <span className={styles.dividerLine} />
+                <button type="button" className={styles.dividerText} onClick={() => handleTabChange("text")}>
+                  or paste text below
+                </button>
+                <span className={styles.dividerLine} />
               </div>
             </div>
           ) : (
@@ -930,27 +965,38 @@ export default function HomePage() {
           )}
 
           <button type="button" className={styles.primaryAction} onClick={handleInitialRoast}>
-            Get my score &amp; roast
+            Get my score &amp; roast →
           </button>
+
+          <div className={styles.trustRow}>
+            <span className={styles.trustItem}>Free forever</span>
+            <span className={styles.trustDot} />
+            <span className={styles.trustItem}>No sign up</span>
+            <span className={styles.trustDot} />
+            <span className={styles.trustItem}>Powered by Gemini</span>
+          </div>
 
           {error ? (
             <div className={styles.errorMessage} role="alert">
               {error}
             </div>
           ) : null}
-        </section>
-      </>
+        </section>,
     );
   }
 
   function renderLoadingPhase() {
-    return (
-      <section className={`${styles.card} ${styles.loadingCard}`} aria-live="polite" aria-busy="true">
+    return renderLandingShell(
+      <section
+        className={`${styles.card} ${styles.uploadCard} ${styles.loadingCard}`}
+        aria-live="polite"
+        aria-busy="true"
+      >
         <div className={styles.loadingBarTrack}>
           <div className={styles.loadingBar} />
         </div>
         <p className={styles.loadingStatus}>{loadingMsg}</p>
-      </section>
+      </section>,
     );
   }
 
