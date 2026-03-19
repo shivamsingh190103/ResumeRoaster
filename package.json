@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "15.2.0",
+    "next": "15.2.8",
     "mammoth": "^1.6.0",
     "pdf-parse": "^1.1.1",
     "react": "^19.0.0",
